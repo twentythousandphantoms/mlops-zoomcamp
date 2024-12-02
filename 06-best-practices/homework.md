@@ -140,10 +140,10 @@ aws s3 ls
 
 In both cases we should adjust commands for localstack. What option do we need to use for such purposes?
 
-* `--backend-store-uri`
-* `--profile`
-* `--endpoint-url`
-* `--version`
+* ~~`--backend-store-uri`~~
+* ~~`--profile`~~
+* **`--endpoint-url`**
+* ~~`--version`~~
 
 
 ## Make input and output paths configurable
