@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+s3fs = "*"
 
 [dev-packages]
 pytest = "*"

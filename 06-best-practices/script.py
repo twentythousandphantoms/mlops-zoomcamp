@@ -57,7 +57,7 @@ def get_output_path(year, month):
     Returns:
     - Output file path as a string
     """
-    default_output_pattern = 's3://nyc-duration-prediction-alexey/taxi_type=fhv/year={year:04d}/month={month:02d}/predictions.parquet'
+    default_output_pattern = 's3://nyc-duration-prediction/taxi_type=fhv/year={year:04d}/month={month:02d}/predictions.parquet'
     output_pattern = os.getenv('OUTPUT_FILE_PATTERN', default_output_pattern)
     return output_pattern.format(year=year, month=month)
 
@@ -74,9 +74,24 @@ def read_data(filename, categorical):
     - DataFrame with processed data
     """
     print(f"Reading data from {filename}...")
-    df = pd.read_parquet(filename)
+
+    # Check if S3_ENDPOINT_URL is set for Localstack S3
+    s3_endpoint_url = os.getenv('S3_ENDPOINT_URL')
+    if s3_endpoint_url:
+        print(f"Using Localstack S3 endpoint: {s3_endpoint_url}")
+        options = {
+            'client_kwargs': {
+                'endpoint_url': s3_endpoint_url
+            }
+        }
+        df = pd.read_parquet(filename, storage_options=options)
+    else:
+        print("No S3 endpoint specified. Using default method.")
+        df = pd.read_parquet(filename)
+
     print("Data read successfully. Preparing data...")
     return prepare_data(df, categorical)
+
 
 
 def main(year, month):
@@ -123,7 +138,14 @@ def main(year, month):
     df_result = pd.DataFrame()
     df_result['ride_id'] = df['ride_id']
     df_result['predicted_duration'] = y_pred
-    df_result.to_parquet(output_file, engine='pyarrow', index=False)
+    options = {
+        'client_kwargs': {
+            'endpoint_url': os.getenv('S3_ENDPOINT_URL')
+        },
+        'key': 'dummy',  # Dummy access key
+        'secret': 'dummy'  # Dummy secret key
+    }
+    df_result.to_parquet(output_file, engine='pyarrow', index=False, storage_options=options)
     print("Process completed successfully.")
 
 
