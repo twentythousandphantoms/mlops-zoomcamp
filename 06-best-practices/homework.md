@@ -108,10 +108,10 @@ The same is true for Pandas Series. Also, a DataFrame could be turned into a lis
 
 How many rows should be there in the expected dataframe?
 
-* 1
-* 2
-* 3
-* 4
+* ~~1~~
+* **2**
+* ~~3~~
+* ~~4~~
 
 
 ## Q4. Mocking S3 with Localstack 

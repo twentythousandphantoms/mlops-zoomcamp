@@ -6,6 +6,29 @@ import pickle
 import pandas as pd
 
 
+def prepare_data(df, categorical):
+    """
+    Applies transformations to the DataFrame.
+
+    Parameters:
+    - df: Input DataFrame
+    - categorical: List of categorical columns
+
+    Returns:
+    - Transformed DataFrame
+    """
+    df['duration'] = df.tpep_dropoff_datetime - df.tpep_pickup_datetime
+    df['duration'] = df.duration.dt.total_seconds() / 60
+
+    # Filter outliers
+    df = df[(df.duration >= 1) & (df.duration <= 60)].copy()
+
+    # Process categorical columns
+    df[categorical] = df[categorical].fillna(-1).astype('int').astype('str')
+    
+    return df
+
+
 def read_data(filename, categorical):
     """
     Reads and preprocesses the input Parquet file.
@@ -19,19 +42,8 @@ def read_data(filename, categorical):
     """
     print(f"Reading data from {filename}...")
     df = pd.read_parquet(filename)
-    
-    print("Calculating trip duration...")
-    df['duration'] = df.tpep_dropoff_datetime - df.tpep_pickup_datetime
-    df['duration'] = df.duration.dt.total_seconds() / 60
-
-    print("Filtering outliers in duration...")
-    df = df[(df.duration >= 1) & (df.duration <= 60)].copy()
-
-    print("Processing categorical columns...")
-    df[categorical] = df[categorical].fillna(-1).astype('int').astype('str')
-    
-    print("Data reading and preprocessing completed.")
-    return df
+    print("Data read successfully. Preparing data...")
+    return prepare_data(df, categorical)
 
 
 def main(year, month):
@@ -45,7 +57,7 @@ def main(year, month):
     print(f"Starting the process for {year}-{month:02d}...")
     
     input_file = f'https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year:04d}-{month:02d}.parquet'
-    output_file = f'output/taxi_type=yellow_year={year:04d}_month={month:02d}.parquet'
+    output_file = f'taxi_type=yellow_year={year:04d}_month={month:02d}.parquet'
 
     print("Loading the model...")
     with open('model.bin', 'rb') as f_in:
@@ -55,7 +67,6 @@ def main(year, month):
     categorical = ['PULocationID', 'DOLocationID']
 
     # Read and preprocess the data
-    print("Reading and preprocessing data...")
     df = read_data(input_file, categorical)
     df['ride_id'] = f'{year:04d}/{month:02d}_' + df.index.astype('str')
 
