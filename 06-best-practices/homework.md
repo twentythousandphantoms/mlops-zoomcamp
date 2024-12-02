@@ -265,10 +265,10 @@ verify the result is correct.
 
 What's the sum of predicted durations for the test dataframe?
 
-* 13.08
-* 36.28
-* 69.28
-* 81.08
+* ~~13.08~~
+* **36.28**
+* ~~69.28~~
+* ~~81.08~~
 
 
 ## Running the test (ungraded)
