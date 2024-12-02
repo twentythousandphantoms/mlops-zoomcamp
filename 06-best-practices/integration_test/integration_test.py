@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from datetime import datetime
+import subprocess
 
 def dt(hour, minute, second=0):
     return datetime(2023, 1, 1, hour, minute, second)
@@ -35,3 +36,16 @@ df_input.to_parquet(
 )
 
 print("Test data saved to S3.")
+
+# Run the script for January 2023
+print("Running script.py...")
+subprocess.run(["python", "script.py", "2023", "1"], check=True)
+
+# Read the output from S3
+output_file = "s3://nyc-duration/out/2023-01.parquet"
+df_output = pd.read_parquet(output_file, storage_options=options)
+print("Output data read from S3.")
+
+# Verify the sum of predicted durations
+sum_predicted_durations = df_output['predicted_duration'].sum()
+print(f"Sum of predicted durations: {sum_predicted_durations}")

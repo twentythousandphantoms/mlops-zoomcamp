@@ -79,11 +79,7 @@ def read_data(filename, categorical):
     s3_endpoint_url = os.getenv('S3_ENDPOINT_URL')
     if s3_endpoint_url:
         print(f"Using Localstack S3 endpoint: {s3_endpoint_url}")
-        options = {
-            'client_kwargs': {
-                'endpoint_url': s3_endpoint_url
-            }
-        }
+        options = {'client_kwargs': {'endpoint_url': s3_endpoint_url}}
         df = pd.read_parquet(filename, storage_options=options)
     else:
         print("No S3 endpoint specified. Using default method.")
@@ -92,6 +88,17 @@ def read_data(filename, categorical):
     print("Data read successfully. Preparing data...")
     return prepare_data(df, categorical)
 
+
+def save_data(df, filename):
+    print(f"Saving data to {filename}...")
+    s3_endpoint_url = os.getenv('S3_ENDPOINT_URL')
+    options = {
+        'client_kwargs': {'endpoint_url': s3_endpoint_url},
+        'key': 'dummy',
+        'secret': 'dummy'
+    }
+    df.to_parquet(filename, engine='pyarrow', index=False, storage_options=options)
+    print("Data saved successfully.")
 
 
 def main(year, month):
@@ -133,19 +140,10 @@ def main(year, month):
     mean_duration = y_pred.mean()
     print(f"Predicted mean duration: {mean_duration}")
 
-    # Save results to Parquet
-    print(f"Saving results to {output_file}...")
     df_result = pd.DataFrame()
     df_result['ride_id'] = df['ride_id']
     df_result['predicted_duration'] = y_pred
-    options = {
-        'client_kwargs': {
-            'endpoint_url': os.getenv('S3_ENDPOINT_URL')
-        },
-        'key': 'dummy',  # Dummy access key
-        'secret': 'dummy'  # Dummy secret key
-    }
-    df_result.to_parquet(output_file, engine='pyarrow', index=False, storage_options=options)
+    save_data(df_result, output_file)
     print("Process completed successfully.")
 
 
