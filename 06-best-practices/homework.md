@@ -58,6 +58,8 @@ What should be the other file?
 Hint: to be able to test `batch.py`, we need to be able to
 import it. Without this other file, we won't be able to do it.
 
+ANSWER:
+The other file should be an `__init__.py` file
 
 ## Q3. Writing first unit test
 
